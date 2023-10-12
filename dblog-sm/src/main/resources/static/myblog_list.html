@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客列表</title>
+    <link rel="stylesheet" href="css/conmmon.css">
+    <link rel="stylesheet" href="css/blog_list.css">
+    <script src="js/jquery.min.js"></script>
+
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <div class="nav">
+        <img src="img/logo2.jpg" alt="">
+        <span class="title">我的博客系统</span>
+        <!-- 用来占据中间位置 -->
+        <span class="spacer"></span>
+        <a href="blog_list.html">主页</a>
+        <a href="blog_edit.html">写博客</a>
+        <a href="#">注销</a>
+    </div>
+    <!-- 版心 -->
+    <div class="container">
+        <!-- 左侧个人信息 -->
+        <div class="container-left">
+            <div class="card">
+                <img src="img/avatar.png" class="avtar" alt="">
+                <h3>小可爱</h3>
+                <a href="http:www.github.com">github 地址</a>
+                <div class="counter">
+                    <span>文章</span>
+                    <span>分类</span>
+                </div>
+                <div class="counter">
+                    <span>2</span>
+                    <span>1</span>
+                </div>
+            </div>
+        </div>
+        <!-- 右侧内容详情 -->
+        <div id="artListDiv" class="container-right" style="margin-left: 10%">
+            <!-- 每一篇博客包含标题, 摘要, 时间 -->
+            <div class="blog">
+                <div class="title">我的第一篇博客</div>
+                <div class="date">2021-06-02</div>
+                <div class="desc">
+                    从今天起, 我要认真敲代码. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cum distinctio ullam eum ut
+                    veroab laborum numquam tenetur est in dolorum a sint, assumenda adipisci similique quaerat vel.
+                    Facere,
+                    et.
+                </div>
+                <a href="blog_content.html?id=1" class="detail">查看全文 &gt;&gt;</a>&nbsp;&nbsp;
+                <a href="blog_content.html?id=1" class="detail">修改 &gt;&gt;</a>&nbsp;&nbsp;
+                <a href="blog_content.html?id=1" class="detail">删除 &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        //初始化方法
+        function init(){
+            jQuery.ajax({
+                url:"/art/myList",
+                type:"GET",
+                data:{
+
+                },
+                success:function (res){
+                    if (res.code==200){
+                        //请求成功
+                        var createHtml="";
+                        var artList=res.data;
+                        if (artList==null||artList.length==0){
+                            //未发表文章
+                            createHtml+="<h3 style='margin-left:20px;margin-top:20px'>暂无文章，请先" +
+                                "<a href='blog_add.html'>添加</a>!</h3>"
+                        }else {
+                            for (var i=0;i<artList.length;i++){
+                                var art=artList[i];
+                                createHtml+='<div class="blog">';
+                                createHtml+='<div class="title">'+art.title+'</div>';
+                                createHtml+='<div class="date">'+art.createTime+'</div>';
+                                createHtml+='<div class="desc">';
+                                createHtml+=art.content;
+                                createHtml+='</div>';
+                                createHtml+='<a href="blog_content.html?aid=' +
+                                    art.id+'" class="detail">查看全文 &gt;&gt;</a>&nbsp;&nbsp;';
+                                createHtml+='<a href="blog_edit.html?aid=' +
+                                    art.id+'" class="detail">修改 &gt;&gt;</a>&nbsp;&nbsp;';
+                                createHtml+='<a href="del('+art.id+')" class="detail">删除 &gt;&gt;</a>';
+                                createHtml+='</div>'
+                            }
+                        }
+                        jQuery("#artListDiv").html(createHtml);
+                    }else{
+                        alert("抱歉，操作失败！"+res.msg);
+                    }
+                }
+            })
+        }
+        init();
+    </script>
+</body>
+
+</html>

@@ -4,14 +4,22 @@ import com.example.demo.common.ResultAjax;
 import com.example.demo.common.SessionUtils;
 import com.example.demo.model.ArticleInfo;
 import com.example.demo.model.Userinfo;
+import com.example.demo.model.vo.UserInfoVO;
 import com.example.demo.service.ArticleService;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 @RestController
 @RequestMapping("/art")
@@ -19,7 +27,10 @@ public class ArticleController {
 
     @Autowired
     private ArticleService articleService;
+
     private static final int _DESC_LEN=120;//文章简介
+    @Resource
+    private ThreadPoolTaskExecutor taskExecutor;
     /**
      * 当前登录用户的文章列表
      * @return
@@ -44,5 +55,127 @@ public class ArticleController {
         }
         //3.返回给前端
         return ResultAjax.succ(list);
+    }
+
+    /**
+     *删除文章
+     */
+    @RequestMapping("/del")
+    public ResultAjax del(Integer aid,HttpServletRequest request){
+        //1.参数校验
+        if (aid==null||aid<0){
+            return ResultAjax.fail(-1,"参数错误");
+        }
+        //2.得到当前登录对象
+        Userinfo userinfo=SessionUtils.getUser(request);
+        if (userinfo==null){
+            return ResultAjax.fail(-1,"请先登录!");
+        }
+        //3.判断文章的归属人+删除操作
+        int res=articleService.del(aid, userinfo.getId());
+        //4.结果给前端
+        return ResultAjax.succ(res);
+    }
+
+    /**
+     * 添加文章
+     */
+    @RequestMapping("/add")
+    public ResultAjax add(ArticleInfo articleInfo,HttpServletRequest request){
+        //1.校验参数
+        if (articleInfo==null||!StringUtils.hasLength(articleInfo.getTitle())||
+                !StringUtils.hasLength(articleInfo.getContent())){
+            return ResultAjax.fail(-1,"非法参数");
+        }
+        //2.组装数据
+        Userinfo userinfo=SessionUtils.getUser(request);
+        if (userinfo==null){
+            return ResultAjax.fail(-1,"请先登录！");
+
+        }
+        articleInfo.setUid(userinfo.getId());
+        //3.将数据入库
+        int result=articleService.add(articleInfo);
+        //4.将结果展示给前端
+        return ResultAjax.succ(result);
+    }
+
+    /**
+     * 查询自己发表的文章详情
+     */
+    @RequestMapping("/update_init")
+    public ResultAjax updateInit(Integer aid,HttpServletRequest request){
+        //1.参数校验
+        if (aid==null||aid<=0){
+            return ResultAjax.fail(-1,"参数错误！");
+        }
+        //2.得到当前用户id
+        Userinfo userinfo=SessionUtils.getUser(request);
+        if (userinfo==null){
+            return ResultAjax.fail(-2,"请先登录！");
+        }
+
+        //3.查询文章并校验权限 where id=#{aid} and uid=#{id}
+        ArticleInfo articleInfo=articleService.getArticleByIdAndUid(aid, userinfo.getId());
+        //4.将结果给前端
+        return ResultAjax.succ(articleInfo);
+    }
+
+    @RequestMapping("/update")
+    public ResultAjax update(ArticleInfo articleInfo,HttpServletRequest request){
+        //1.校验参数
+        if (articleInfo==null||
+        !StringUtils.hasLength(articleInfo.getTitle())||
+        !StringUtils.hasLength(articleInfo.getContent())||
+        articleInfo.getId()==0){
+            return ResultAjax.fail(-1,"非法参数! ");
+        }
+        //2.获取登录用户
+        Userinfo userinfo=SessionUtils.getUser(request);
+        if (userinfo==null){
+            return ResultAjax.fail(-2,"请先登录! ");
+        }
+        articleInfo.setUid(userinfo.getId());
+        //3.修改文章，并校验归属人
+        int result=articleService.update(articleInfo);
+        //4.返回结果
+        return ResultAjax.succ(result);
+    }
+
+    /**
+     * 查询文章详情页
+     */
+    @RequestMapping("/detail")
+    public ResultAjax detail(Integer aid) throws ExecutionException, InterruptedException {
+        //1.参数校验
+        if (aid==null||aid<=0){
+            return ResultAjax.fail(-1,"非法参数");
+        }
+        //2.查询文章详情
+        ArticleInfo articleInfo=articleService.getDetail(aid);
+        if (articleInfo==null||articleInfo.getId()<=0){
+            return ResultAjax.fail(-1,"非法参数");
+        }
+        //3.根据uid查询用户详情
+        FutureTask<UserInfoVO> userTask=new FutureTask<>(()->{
+            //TODO 调用service
+            return null;
+        });
+        taskExecutor.submit(userTask);
+        //4.根据uid查询用户发布的总文章数
+        FutureTask<Integer> artCountTask=new FutureTask<>(()->{
+            //TODO 调用service
+            return 0;
+        });
+        taskExecutor.submit(artCountTask);
+        //5.组装
+        UserInfoVO userInfoVO=userTask.get();//等待任务（线程池）执行完成
+        int artCount=artCountTask.get();//等待任务（线程池）执行完成
+        userInfoVO.setArtCount(artCount);
+        HashMap<String, Object> result=new HashMap<>();
+        result.put("user",userInfoVO);
+        result.put("art",articleInfo);
+        //6.返回结果给前端
+        return ResultAjax.succ(result);
     }
 }

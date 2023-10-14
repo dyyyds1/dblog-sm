@@ -66,4 +66,19 @@ public class UserController {
         //5.将结果返回给用户
         return ResultAjax.succ(1);
     }
+
+    /**
+     * 退出登录
+     * @param request
+     * @return
+     */
+    @RequestMapping("/logout")
+    public ResultAjax logout(HttpServletRequest request){
+        HttpSession session=request.getSession(false);
+        if (session!=null&&session.getAttribute(AppVariable.SESSION_USERINFO_KEY)!=null){
+            session.removeAttribute(AppVariable.SESSION_USERINFO_KEY);
+        }
+        return ResultAjax.succ(1);
+    }
+
 }

@@ -13,4 +13,6 @@ public interface UserMapper {
     int reg(Userinfo userinfo);
     @Select("select * from userinfo where username= #{username}")
     Userinfo getUserByName(@Param("username")String username);
+
+
 }

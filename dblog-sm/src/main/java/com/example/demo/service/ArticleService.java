@@ -14,4 +14,21 @@ public class ArticleService {
     public List<ArticleInfo> getListById(int uid){
         return articleMapper.getListById(uid);
     }
+
+    public int del(Integer aid,int uid){
+        return articleMapper.del(aid,uid);
+    }
+    public int add(ArticleInfo articleInfo){
+        return articleMapper.add(articleInfo);
+    }
+
+    public ArticleInfo getArticleByIdAndUid(int aid,int uid){
+        return articleMapper.getArticleByIdAndUid(aid,uid);
+    }
+    public int update(ArticleInfo articleInfo){
+        return articleMapper.update(articleInfo);
+    }
+    public ArticleInfo getDetail(int aid){
+        return articleMapper.getDetailById(aid);
+    }
 }

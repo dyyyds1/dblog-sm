@@ -5,4 +5,6 @@ import lombok.Data;
 
 @Data
 public class UserInfoVO extends Userinfo {
+    private String checkCode;
+    private int artCount;
 }

@@ -31,4 +31,18 @@ public class ArticleService {
     public ArticleInfo getDetail(int aid){
         return articleMapper.getDetailById(aid);
     }
+
+    public int getArtCountByUid(int uid){
+        return articleMapper.getArtCountByUid(uid);
+    }
+    public int incrementRCount(int aid) {
+        return articleMapper.incrementRCount(aid);
+    }
+
+    public List<ArticleInfo> getListByPage(int psize, int offset) {
+        return articleMapper.getListByPage(psize, offset);
+    }
+    public int getCount(){
+        return articleMapper.getCount();
+    }
 }

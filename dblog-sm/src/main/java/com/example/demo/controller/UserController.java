@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.common.AppVariable;
+import com.example.demo.common.PasswordUtils;
 import com.example.demo.common.ResultAjax;
 import com.example.demo.model.Userinfo;
 import com.example.demo.model.vo.UserInfoVO;
@@ -32,6 +33,8 @@ public class UserController {
             //参数异常
             return ResultAjax.fail(-1,"非法参数");
         }
+        //加盐处理
+        userinfo.setPassword(PasswordUtils.encrypt(userinfo.getPassword()));
         //2.请求service添加操作
         int res=userService.reg(userinfo);
         //3.返回结果
@@ -57,7 +60,8 @@ public class UserController {
             return ResultAjax.fail(-2,"用户名或密码错误！");
         }
         //3.使用对象中的密码和用户输入密码比较
-        if (!userInfoVO.getPassword().equals(userinfo.getPassword())){
+        //userInfoVO.getPassword().equals(userinfo.getPassword())
+        if (!PasswordUtils.decrypt(userInfoVO.getPassword(),userinfo.getPassword())){
             return ResultAjax.fail(-2,"密码错误！");
         }
         //4.比较成功后，将对象存到session中

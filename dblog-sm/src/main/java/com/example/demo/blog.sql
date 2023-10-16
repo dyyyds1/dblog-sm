@@ -21,8 +21,8 @@ insert into ArticleInfo values (null,'java','java正文',now(),now(),2,1,1);
 drop table if exists Userinfo;
 CREATE TABLE Userinfo (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      username VARCHAR(255) NOT NULL unique ,
-      password VARCHAR(255) NOT NULL,
+      username VARCHAR(100) NOT NULL unique ,
+      password VARCHAR(65) NOT NULL,
       photo VARCHAR(255),
       createTime DATETIME,
       updateTime DATETIME,

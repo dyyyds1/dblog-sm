@@ -52,7 +52,7 @@
             <div class="date">
                 发布时间：<span id="createtime"></span>
                 |
-                阅读量：<span id="rcount"></span>
+                阅读量：<span id="rcount">1</span>
             </div>
             <!-- 博客正文 -->
             <div id="editorDiv">
@@ -93,7 +93,7 @@
                     if(user!=null){
                         // 给用户对象设置值
                         if(user.photo!=""){
-                            jQuery("#photo").att("src",user.photo);
+                            //jQuery("#photo").att("src",user.photo);
                         }
                         jQuery("#username").html(user.username);
                         jQuery("#artcount").html(user.artCount); // 用户发布的总文章数
@@ -102,9 +102,10 @@
                     }
                     if(art!=null){
                         jQuery("#title").html(art.title);
-                        jQuery("#createtime").html(art.createtime);
+                        jQuery("#createtime").html(art.createTime);
                         jQuery("#rcount").html(art.rcount); // 阅读量
                         initEdit(art.content);
+                        console.log(art);
                     }else{
                         alert("抱歉：查询失败！"+res.msg);
                     }
@@ -115,7 +116,7 @@
         });
     }
     init();
-    // 访问量加 1
+    //访问量加 1
     function incrementRCount(){
         if(aid==null || aid<=0){
             return false;
